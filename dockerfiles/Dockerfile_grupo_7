@@ -1,0 +1,63 @@
+FROM ros:noetic
+
+RUN apt update && apt install -y rviz \
+    ros-noetic-moveit \
+    curl \
+    apt-utils \
+    python3-pip \
+    python-is-python3 \
+    net-tools \
+    nmap \
+    xauth \
+    ros-noetic-robot-state-publisher \
+    ros-noetic-joint-state-publisher \
+    ros-noetic-rqt \
+    ros-noetic-tf-conversions \
+    git \
+    ros-noetic-usb-cam \
+    ros-noetic-camera-calibration \
+    htop \
+    sudo \
+    libxmlrpc-core-c3-dev \
+    wget \
+    fontconfig \
+    unzip \
+    python3-tk  # Aquí se instala tkinter
+
+# Copiar el archivo local de Montserrat desde el repositorio al contenedor
+COPY fonts/montserrat.zip /tmp/montserrat.zip
+
+# Descomprimir y configurar las fuentes
+RUN unzip /tmp/montserrat.zip -d /usr/share/fonts/truetype/montserrat/ && \
+    rm /tmp/montserrat.zip && \
+    fc-cache -f -v
+
+RUN pip install --upgrade pip \
+	catkin_tools \
+    tensorboard \
+    ur_rtde \
+    gymnasium==0.29.1 \
+    stable-baselines3[extra]==2.2.1 \
+    numpy --upgrade \
+    scipy \
+    opencv-contrib-python \
+    mediapipe \
+    ttkbootstrap \
+    Pillow==9.2.0
+
+# Copiar el archivo user.py a la carpeta themes de ttkbootstrap
+COPY themes/user.py /usr/local/lib/python3.8/dist-packages/ttkbootstrap/themes/user.py
+
+RUN rm -rf /var/lib/apt/lists/* && \
+    groupadd -g 1000 laboratorio && \
+    useradd -ms /bin/bash laboratorio -u 1000 -g 1000 && \
+    echo "laboratorio ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    echo "source /opt/ros/noetic/setup.bash" >> /home/laboratorio/.bashrc && \
+    echo 'laboratorio:laboratorio' | chpasswd && \
+    chown laboratorio:laboratorio /home/laboratorio && \
+    mkdir -p /var/run/laboratorio/1000 && \
+    chown laboratorio:laboratorio /var/run/laboratorio/1000
+
+USER laboratorio
+
+ENTRYPOINT [ "sleep", "infinity"]

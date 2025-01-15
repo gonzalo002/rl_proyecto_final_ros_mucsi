@@ -1,0 +1,72 @@
+<launch>
+  <!-- DEFINCIÓN DE ARGUMENTOS -->
+  <arg name="cam_tracker" default="true" doc="Utilizar camaras para localizacion de cubos"/>
+  <arg name="cam_view" default="true" doc="Utilizar camaras para procesamiento de figura"/>
+  <arg name="rob_sim" default="false" doc="Utilizar simulacion del robot"/>
+
+  <!-- Si cam_tracker o cam_view == TRUE -->
+  <group if="$(eval cam_tracker or cam_view)">
+    <!-- CÁMARA PLANTA -->
+    <node name="top_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video0" /> <!-- CAMBIAR ID -->
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="top_cam" />
+      <param name="io_method" value="mmap"/>
+      <param name="camera_info_url" value="/home/laboratorio/ros_workspace/src/proyecto_final/data/necessary_data/ost.yaml"/>
+    </node>
+  </group>
+
+  <!-- Si cam_view == TRUE -->
+  <group if="$(arg cam_view)">
+    <!-- CÁMARA ALZADO --> 
+    <node name="alzado_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video4" /> <!-- CAMBIAR ID -->
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="alzado_cam" />
+      <param name="io_method" value="mmap"/>
+      <param name="camera_info_url" value=""/>
+    </node>
+
+    <!-- CÁMARA PERFIL -->
+    <node name="perfil_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video8" /> <!-- CAMBIAR ID -->
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="perfil_cam" />
+      <param name="io_method" value="mmap"/>
+      <!-- Deshabilitar URL de calibración -->
+      <param name="camera_info_url" value=""/>
+    </node>
+  </group>
+
+  <!-- Si rob_sim == TRUE -->
+  <group if="$(arg rob_sim)">
+    <!-- ROBOT FISICO --> 
+    <include file="$(find launcher_robots_lab_robotica)/launch/sim_206.launch"/>
+  </group>
+
+  <!-- Si rob_sim == FALSE -->
+  <group unless="$(arg rob_sim)">
+    <!-- SIMULACION ROBOT --> 
+    <include file="$(find launcher_robots_lab_robotica)/launch/robot_206.launch"/>
+  </group>
+
+  <!-- Servidor: CUBE TRACKER --> 
+  <node name="cube_tracker_node" pkg="proyecto_final" type="CubeTrackerActionServer.py" output="screen" >
+    <param name="cam_on" value="$(arg cam_tracker)" /> <!-- USAR CÁMARA (true/false) -->
+  </node>
+
+  <!-- Servidor: FIGURE MAKER --> 
+  <node name="figure_maker_node" pkg="proyecto_final" type="FigurasActionServer.py" output="screen" >
+    <param name="cam_on" value="$(arg cam_view)" /> <!-- USAR CÁMARA (true/false) -->
+  </node>
+
+  <!-- Servidor: CUBE ORDER --> 
+  <node name="rl_node" pkg="proyecto_final" type="RLActionServer.py" output="screen"/>
+
+</launch>

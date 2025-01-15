@@ -1,0 +1,29 @@
+<launch>
+
+    <!-- CÁMARA HAND TOP -->
+    <node name="top_hand_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video4" /> <!-- CAMBIAR ID -->
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="top_cam" />
+      <param name="io_method" value="mmap"/>
+      <param name="camera_info_url" value=""/>
+    </node>
+
+
+    <!-- CÁMARA HAND LATERAL --> 
+    <node name="lateral_hand_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+      <param name="video_device" value="/dev/video0" /> <!-- CAMBIAR ID -->
+      <param name="image_width" value="640" />
+      <param name="image_height" value="480" />
+      <param name="pixel_format" value="yuyv" />
+      <param name="camera_frame_id" value="alzado_cam" />
+      <param name="io_method" value="mmap"/>
+      <param name="camera_info_url" value=""/>
+    </node>
+
+    <!-- Topic: HAND_CONTROL --> 
+    <node name="hand_detector_node" pkg="proyecto_final" type="HandDetectorTopic.py" output="screen" />
+
+</launch>

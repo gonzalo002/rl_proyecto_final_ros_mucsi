@@ -1,0 +1,9 @@
+# Request
+int8 order
+---
+# Result
+IdCubos[] cubes_position
+int8[] color_counter
+---
+# Feedback
+int8 feedback

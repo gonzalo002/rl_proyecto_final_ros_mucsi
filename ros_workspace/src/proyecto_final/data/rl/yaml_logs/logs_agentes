@@ -1,0 +1,204 @@
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_13_0_28_cubes_10
+    Log_name: PPO_2025_1_13_0_28_cubes_10
+    date: '2025_1_13_0_28'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 2
+    train_time: 3.481022596359253
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 20
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_13_0_28_cubes_10
+    Log_name: PPO_2025_1_13_0_28_cubes_10
+    date: '2025_1_13_0_28'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 2
+    train_time: 2.966529607772827
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 20
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_13_0_33_cubes_10
+    Log_name: PPO_2025_1_13_0_33_cubes_10
+    date: '2025_1_13_0_33'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 2
+    train_time: 5.500857830047607
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 20
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_13_0_35_cubes_10
+    Log_name: PPO_2025_1_13_0_35_cubes_10
+    date: '2025_1_13_0_35'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 2
+    train_time: 3.237884044647217
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 20
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_15_8_44_cubes_10
+    Log_name: PPO_2025_1_15_8_44_cubes_10
+    date: '2025_1_15_8_44'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 500000
+    train_time: 607.8855214118958
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 2048
+    batch_size: 32
+    n_epochs: 3
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.005
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs:
+      net_arch:
+      - 128
+      - 128
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_15_9_20_cubes_10
+    Log_name: PPO_2025_1_15_9_20_cubes_10
+    date: '2025_1_15_9_20'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 1000000
+    train_time: 1307.902919769287
+    cubos: 10
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 512
+    batch_size: 32
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.005
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/tb_logs
+    policy_kwargs:
+      net_arch:
+      - 128
+      - 128
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Introduce Comentario

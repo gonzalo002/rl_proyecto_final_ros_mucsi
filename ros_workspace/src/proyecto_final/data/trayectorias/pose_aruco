@@ -1,0 +1,13 @@
+P_ARUCO: !!python/object/new:geometry_msgs.msg._Pose.Pose
+  state:
+  - !!python/object/new:geometry_msgs.msg._Point.Point
+    state:
+    - -0.05169569052364177
+    - 0.3998934021320653
+    - 0.3009888682767877
+  - !!python/object/new:geometry_msgs.msg._Quaternion.Quaternion
+    state:
+    - -0.9992799611486218
+    - 0.03794123557867975
+    - 2.134124135835257e-05
+    - 0.00014640397258345198

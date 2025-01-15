@@ -1,0 +1,107 @@
+J_HOME: # Posición de Home Rob_206
+- -4.274049867802887e-05
+- -1.5699951456957315
+- -4.3308733438607305e-05
+- -1.5699311059764405
+- -5.036989320927887e-05
+- -2.6051198140919496e-05
+
+J_LINK_1: # Posición Enlace a Trayectorias de Agarre
+- -1.5024831930743616
+- -1.5473662682673712
+- -1.152422308921814
+- -2.011538167993063
+- 1.573134183883667
+- -0.014409367238179982
+
+J_OFF_CAMERA: # Posición con Robot fuera de Área de Visión de la Cámara
+- -1.5551345984088343
+- -1.5711451969542445
+- 0.00019628206361943512
+- -1.5705829137044311
+- 0.0001260172139154747
+- 1.3828277587890625e-05
+
+J_PRE_ARUCO:
+- -1.0833447615252894
+- -1.7309075794615687
+- -1.170609951019287
+- -1.8098131618895472
+- 1.5737088918685913
+- 0.5627355575561523
+
+J_MATRIX_ORIGIN:
+- 1.3093988043760343
+- -1.8326867914431624
+- 2.1274094137946804
+- -1.8674426057215843
+- 4.715747198320285
+- 5.995807735417851
+
+J_DISCARD_ORIGIN:
+- -0.2277143637286585
+- -1.3575881731561203
+- -1.539842128753662
+- -1.8138662777342738
+- 1.5733420848846436
+- -0.10102492967714483
+
+J_DISCARD_2_ORIGIN:
+- -2.1487272421466272
+- -1.6346632442870082
+- -1.1192048788070679
+- -1.9574839077391566
+- 1.5733743906021118
+- 0.9283180236816406
+
+J_HAND_ORIGIN: # Posición Enlace a Trayectorias de Agarre
+- -1.5024831930743616
+- -1.5473662682673712
+- -1.152422308921814
+- -2.011538167993063
+- 1.573134183883667
+- -0.014409367238179982
+
+P_MATRIX_ORIGIN: !!python/object/new:geometry_msgs.msg._Pose.Pose # Pose Inicial de la Figura
+  state:
+  - !!python/object/new:geometry_msgs.msg._Point.Point
+    state:
+    - -0.0678382258972314
+    - 0.25277606638767075
+    - 0.23595705710633885
+  - !!python/object/new:geometry_msgs.msg._Quaternion.Quaternion
+    state:
+    - -0.9999303751945782
+    - -0.011799766623123029
+    - -5.149126908018109e-05
+    - 8.728985659246074e-05
+
+P_DISCARD_ORIGIN: !!python/object/new:geometry_msgs.msg._Pose.Pose
+  state:
+  - !!python/object/new:geometry_msgs.msg._Point.Point
+    state:
+    - -0.28996691599352165
+    - 0.22
+    - 0.23539582854608912
+  - !!python/object/new:geometry_msgs.msg._Quaternion.Quaternion
+    state:
+    - 0.6802708033654928
+    - 0.7329608675315642
+    - -2.6605306984095323e-05
+    - 6.928307312140119e-06
+
+P_DISCARD_2_ORIGIN: !!python/object/new:geometry_msgs.msg._Pose.Pose
+  state:
+  - !!python/object/new:geometry_msgs.msg._Point.Point
+    state:
+    - 0.3332830293129509
+    - 0.23
+    - 0.2335302994504278
+  - !!python/object/new:geometry_msgs.msg._Quaternion.Quaternion
+    state:
+    - 0.7233505674517562
+    - -0.6904498301532557
+    - -0.006255739200495766
+    - 0.001963246193891617
+
+

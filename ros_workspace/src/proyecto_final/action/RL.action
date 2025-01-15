@@ -1,0 +1,10 @@
+# Request
+IdCubos[] cubes_position
+int8[]  cubes_order
+---
+# Result
+IdCubos[] cubes_correct_order
+trajectory_msgs/JointTrajectory[] cubes_trajectories
+---
+# Feedback
+int8 feedback
