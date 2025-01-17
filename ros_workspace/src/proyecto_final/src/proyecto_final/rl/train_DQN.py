@@ -53,7 +53,7 @@ def train(n_cubos_max: int = 2, verbose: bool = True):
     today = datetime.datetime.now()
     date = f'{today.year}_{today.month}_{today.day}_{today.hour}_{today.minute}'
     tb_log_name = f'DQN_{date}_cubes_{n_cubos_max}'
-    total_timesteps = 500000
+    total_timesteps = 500_000
 
     # Callback para guardar el modelo cada 100,000 pasos
     checkpoint_callback = CheckpointCallback(

@@ -74,7 +74,7 @@ class OptunaTrain:
             """
             self.model = DQN("MlpPolicy", self.env,
                         learning_rate=learning_rate,
-                        buffer_size=500_000,
+                        buffer_size=100_000,
                         learning_starts=learning_starts,
                         batch_size=64,
                         gamma=gamma,

@@ -14,8 +14,6 @@ from time import time
 from stable_baselines3.common.utils import set_random_seed
 from tf.transformations import quaternion_from_euler
 from proyecto_final.msg import IdCubos
-from moveit_msgs.msg import RobotTrajectory, RobotState
-from trajectory_msgs.msg import JointTrajectory
 
 # Librerias de ROS
 from geometry_msgs.msg import Pose, Point, Quaternion
@@ -362,109 +360,189 @@ class ROSEnv(gym.Env):
             @param action: List[int], acción a realizar.
             @return: Tuple[np.ndarray, float, bool, bool, dict], observación, recompensa, si el episodio ha terminado, si la acción ha sido truncada y la información adicional.
         """
-        """
-        Realiza un paso en el entorno.
-            @param action: List[int], acción a realizar.
-            @return: Tuple[np.ndarray, float, bool, bool, dict], observación, recompensa, si el episodio ha terminado, si la acción ha sido truncada y la información adicional.
-        """
-        if self.failed_attempts >= 10:
-            self.failed = True
-            return self.observation, self.reward, self.done, self.failed, self.info
+        reward = 0.0 # Reinicia la recompensa
+
+        self.n_steps += 1 # Incrementa el número de pasos
+
+        action = int(action)
+
+        if action >= len(self.cubos): # Si la acción no es válida
+            reward = -50.0 - self.total_reward # Penaliza la acción con -50
+
+            self.cont_failed_actions += 1    
+
+            if self.cont_failed_actions > 5:
+                self.failed = True
+                reward = -50.0  
+
+            self.normalize_reward(reward)      
+
+            return self.observation, self.reward, self.done, self.failed, self.info 
+
+        self.cont_failed_actions = 0
+
+        if action in self.taken_actions: # Si la acción ya ha sido tomada
+            reward = -25.0 # Penaliza la acción con -5
+
+            self.cont_repeated_action += 1
+
+            if self.cont_repeated_action > 5:
+                self.failed = True
+                reward = -40.0
+
+            self.normalize_reward(reward)
+
+            return self.observation, self.reward, self.done, self.failed, self.info 
         
-        figure_color = int(self.observation[-1])
-        
-        if figure_color == -1:
-            self.cubos_recogidos += 1
-        
-        if figure_color == 4: # Color desconocido
-            cubos_grises = (np.array(self.available_cubes[:-1]) - np.array(self.needed_cubes[:-1]))
-            figure_color = np.nonzero(cubos_grises != 0)[0][0]
-            self.cubos_recogidos += 1
-        
-        for cube in reversed(self.cubos): # Cubos en mesa de trabajo
-            cube:IdCubos
-            if not cube.color == figure_color:
-                continue
-            
-            selected_cube = cube
-        
-            cube_pose:Pose = selected_cube.pose # Obtiene la pose del cubo 
-            cube_pose.position.z = 0.237 # Ajusta la altura del cubo para recogerlo
+        figure_color = self.observation[-1]
+        selected_cube:IdCubos = deepcopy(self.cubos[action]) # Selecciona el cubo a recoger
 
-            prev_pose:Pose = deepcopy(cube_pose) # Copia la pose del cubo seleccionado
-            prev_pose.position.z = 0.28 # Ajusta la altura del cubo para recogerlo
-
-            self.control_robot.scene.remove_world_object(f'Cubo_{selected_cube.id}')
-
-            start_state = RobotState()
-            start_state.joint_state.position = self.j_link_1
-
-            self.control_robot.move_group.set_start_state(start_state)
-
-            trayectory_tuple:Tuple[bool, RobotTrajectory, float, bool] = self.control_robot.move_group.plan(prev_pose)
-
-
-            if trayectory_tuple[0] != True: 
-                self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', cube.pose, size=(0.025, 0.025, 0.025))
-                self.failed_attempts += 1
-                return self.observation, self.reward, self.done, self.failed, self.info
-            
-            tiempo = trayectory_tuple[1].joint_trajectory.points[-1].time_from_start
-            tiempo_seg = tiempo.to_sec()
-            self.reward += tiempo_seg
-            
-            trayectory_header:list = trayectory_tuple[1].joint_trajectory.header
-            trayectory_points:list = trayectory_tuple[1].joint_trajectory.points
-            trayectory_joint_names:list = trayectory_tuple[1].joint_trajectory.joint_names
-    
-            start_state = RobotState()
-            start_state.joint_state.position = trayectory_points[-1].positions
-
-            self.control_robot.move_group.set_start_state(start_state)
-            trayectory_tuple:Tuple[bool, RobotTrajectory, float, bool] = self.control_robot.move_group.plan(cube_pose)
-
-            
-            if trayectory_tuple[0] != True: 
-                self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', cube.pose, size=(0.025, 0.025, 0.025))
-                self.failed_attempts += 1
-                return self.observation, self.reward, self.done, self.failed, self.info
-            
-            tiempo = trayectory_tuple[1].joint_trajectory.points[-1].time_from_start
-            tiempo_seg = tiempo.to_sec()
-            self.reward += tiempo_seg
-
-            pose_sim = deepcopy(selected_cube.pose)
-            pose_sim.position.z = 0.0125
-            self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', cube.pose, size=(0.025, 0.025, 0.025))
-            
-            for point in trayectory_tuple[1].joint_trajectory.points:
-                trayectory_points.append(point)
-            
-            trajectory = JointTrajectory()
-            trajectory.header = trayectory_header
-            trajectory.joint_names = trayectory_joint_names
-            trajectory.points = trayectory_points
-            
-            
-            self.needed_cubes[figure_color] -= 1
-            self.available_cubes[figure_color] -= 1
+        if figure_color == -1 and self.n_cubos > self.cubos_recogidos:
             self.cubos_recogidos += 1
 
-            self.orden_cubos.append(deepcopy(selected_cube))
+            if self.cubos_recogidos == self.n_cubos:
+                self.done = True
+                avg_time = self.total_time / len(self.taken_actions)
+
+                self.reward = 1.0
+
+            cubo = -1
             
-            self.cubos[cube.id].color = -1
-            self.cubos[cube.id].pose = Pose(Point(-1.0, -1.0, -1.0),
-                                            Quaternion(-1.0, -1.0, -1.0, -1.0))
-            
-            if self.cubos_recogidos >= self.n_cubos:
-                self.done=True
-                return self.observation, self.reward, self.done, self.failed, self.info
-                            
-                
+            self.orden_cubos.append(cubo)
             self._get_obs()
-            self._get_info()
-            
+
             return self.observation, self.reward, self.done, self.failed, self.info
+
+
+        if selected_cube.color != figure_color: # Si el color del cubo no coincide con el color de la figura
+            reward = -20.0 - self.cont_failed_color# Penaliza la acción con -15s
+            if reward < -50:
+                reward = -50
+            
+            self.cont_failed_color += 1
+
+            if self.cont_failed_color > 5:
+                self.failed = True
+                reward = -30.0
+ 
+            self.normalize_reward(reward)
+
+            return self.observation, self.reward, self.done, self.failed, self.info 
+
+        self.cont_failed_color = 0
+
+        cube_pose:Pose = selected_cube.pose # Obtiene la pose del cubo seleccionado
+        cube_pose.position.z = 0.237
+
+        virtual_pose = deepcopy(cube_pose)
+        virtual_pose.position.z -= 0.2245
+
+        prev_pose:Pose = deepcopy(cube_pose) # Copia la pose del cubo seleccionado
+        prev_pose.position.z = 0.3 # Ajusta la altura del cubo para recogerlo
+
+        self.control_robot.scene.remove_world_object(f'Cubo_{selected_cube.id}')
+        
+        start_state = RobotState()
+        start_state.joint_state.position = self.j_link_1
+
+        self.control_robot.move_group.set_start_state(start_state)
+
+        trayectory_tuple:Tuple[bool, RobotTrajectory, float, bool] = self.control_robot.move_group.plan(prev_pose)
+
+        if trayectory_tuple[0] != True:  # Si la trayectoria no es válida
+            self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', virtual_pose, [0.025]*3)
+            self.failed_attempts += 1
+
+            reward = -10.0
+            self.normalize_reward(reward)
+
+            if self.failed_attempts > 5:
+                self.failed = True
+                self.reward = -30.0
+
+            if self.verbose:
+                print(f'\033[31mColisión con Escena - Reward {self.reward} - Acciones {self.orden_cubos}\033[0m')
+
+            return self.observation, self.reward, self.done, self.failed, self.info
+        
+        # Suma del tiempo necesario para alcanzar el cubo
+        tiempo = trayectory_tuple[1].joint_trajectory.points[-1].time_from_start
+        tiempo_seg = tiempo.to_sec()
+        
+        trayectory_points:list = trayectory_tuple[1].joint_trajectory.points
+        
+        start_state = RobotState()
+        start_state.joint_state.position = trayectory_points[-1].positions
+
+        self.control_robot.move_group.set_start_state(start_state)
+        trayectory_tuple:Tuple[bool, RobotTrajectory, float, bool] = self.control_robot.move_group.plan(cube_pose)
+
+        if trayectory_tuple[0] != True:  # Si la trayectoria no es válida
+            self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', virtual_pose, [0.025]*3)
+            self.failed_attempts += 1
+
+            reward = -10.0
+            self.normalize_reward(reward)
+
+            if self.failed_attempts > 5:
+                self.failed = True
+
+            if self.verbose:
+                print(f'\033[31mColisión con Escena - Reward {self.reward} - Acciones {self.orden_cubos}\033[0m')
+
+            return self.observation, self.reward, self.done, self.failed, self.info
+        
+
+        # Suma del tiempo necesario para alcanzar el cubo
+        tiempo = trayectory_tuple[1].joint_trajectory.points[-1].time_from_start
+        tiempo_seg += tiempo.to_sec()
+
+        if tiempo_seg > 5:  # Penaliza si el tiempo es excesivo
+            reward -= 0.1
+        else:  # Recompensa por tiempo dentro del rango esperado
+            reward += 0.1
+
+        self.total_time += tiempo_seg  # Acumula el tiempo total
+        
+        tiempo_seg = tiempo_seg * 10 / 30 # Normaliza el tiempo (0, -10)
+        reward -= tiempo_seg
+
+        self.normalize_reward(reward)
+
+        self.total_reward += reward
+
+        self.cubos_recogidos += 1
+        self.taken_actions.add(action)
+        self.orden_cubos.append(action)
+
+        self.needed_cubes[selected_cube.color] -= 1
+        self.available_cubes[selected_cube.color] -= 1
+        
+        self.discretized_cubes[selected_cube.id]= [self.cube_limit, 
+                                                   self.x_spaces, 
+                                                   self.y_spaces, 
+                                                   self.z_spaces, 
+                                                   self.alpha_spaces,
+                                                   self.color_options]
+        
+        self.failed_attempts = 0
+        
+        if self.verbose:
+            print(f'\033[32m\nTrial {self.n_trials} - Step {self.n_steps} - Paso Completado con Reward {self.reward} - Accion {str(self.orden_cubos)}\033[0m')
+
+        if self.cubos_recogidos == self.n_cubos: # Si se han recogido todos los cubos
+            self.done=True
+        
+        if self.done: # Si el episodio ha terminado
+            self.reward = 1.0
+
+        if self.verbose and self.done: # Si se desea mostrar información en pantalla
+            print(f'\033[35m\nTrial {self.n_trials} - Step {self.n_steps} - \
+                  Completado con Recompensa {self.total_reward} - Accion {str(self.orden_cubos)}\033[0m')
+            
+        self._get_obs()
+
+        return self.observation, self.reward, self.done, self.failed, self.info
 
     def reset(self, *, seed: Union[int, None] = None, options: Union[Dict[str, Any], None] = None) -> Tuple[np.ndarray, Dict[str, Any]]:
         """
@@ -547,21 +625,16 @@ if __name__ == '__main__':
     env = ROSEnv(num_cubos_max=n_cubos_max)
     obs, info = env.reset(seed=seed)
     file_path = '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/')[:os.path.dirname(os.path.abspath(__file__)).split('/').index('proyecto_final')+1])
-    # model = DQN.load(f'{file_path}/data/rl/agentes_entrenados/dqn_rosenv_2025_1_16_23_9_cubes_6_40000_steps', env=env)    
+    model = DQN.load(f'{file_path}/data/rl/agente_definitivo/rl_agent', env=env)    
     done = False
     failed = False
     i=0
     while not done:
         done = False
         failed = False      
-        # action, _ = model.predict(obs)
-        action = 0
+        action, _ = model.predict(obs)
         obs, reward, done, failed, info = env.step(action)
         i+=1
         if failed:
             obs, info = env.reset(seed=seed)
             failed = False
-    print(reward)
-
-    # seed=0 - cubos 2
-    # seed = 4 cubos 2
