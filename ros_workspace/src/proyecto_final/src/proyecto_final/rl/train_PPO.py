@@ -7,7 +7,7 @@ from time import time
 import yaml
 from stable_baselines3.common.evaluation import evaluate_policy
 
-def train(n_cubos_max: int = 2, verbose:bool = False):
+def train(n_cubos_max: int = 2, verbose:bool = True):
     file_path = '/'.join(os.path.dirname(os.path.abspath(__file__)).split('/')[:os.path.dirname(os.path.abspath(__file__)).split('/').index('proyecto_final')+1])
 
     try:
@@ -49,7 +49,7 @@ def train(n_cubos_max: int = 2, verbose:bool = False):
     parameters = {'policy': 'MlpPolicy',
                     'env' : env,
                     'learning_rate': 3e-4,
-                    'n_steps' : 512,
+                    'n_steps' : 256,
                     'batch_size' : 32,
                     'n_epochs' : 10,
                     'gamma':  0.99,
@@ -79,11 +79,11 @@ def train(n_cubos_max: int = 2, verbose:bool = False):
     today = datetime.datetime.now()
     date = f'{today.year}_{today.month}_{today.day}_{today.hour}_{today.minute}'
     tb_log_name = f'PPO_{date}_cubes_{n_cubos_max}'
-    total_timesteps = 1000000
+    total_timesteps = 100000
 
     # Callback para guardar el modelo cada 20,000 pasos
     checkpoint_callback = CheckpointCallback(
-        save_freq=20000, 
+        save_freq=100000, 
         save_path=f'{file_path}/data/rl/agentes_entrenados',
         name_prefix=f'ppo_rosenv_{date}_cubes_{n_cubos_max}'
     )
@@ -129,7 +129,7 @@ def train(n_cubos_max: int = 2, verbose:bool = False):
     with open(f'{file_path}/data/rl/yaml_logs/logs_agentes', '+a') as f:
             yaml.dump(save_in_yaml, f, default_flow_style=False, sort_keys=False)
 
-def retrain(model_name:str, n_cubos_max:int = 2, verbose:bool = False):
+def retrain(model_name:str, n_cubos_max:int = 2, verbose:bool = True):
     """
     Función para reentrenar un modelo previamente entrenado
         @param model_path: str - Ruta del modelo
@@ -150,7 +150,7 @@ def retrain(model_name:str, n_cubos_max:int = 2, verbose:bool = False):
 
     # Callback para guardar el modelo cada 20,000 pasos
     checkpoint_callback = CheckpointCallback(
-        save_freq=20000, 
+        save_freq=100000, 
         save_path=f'{file_path}/data/rl/agentes_entrenados',
         name_prefix=f'ppo_rosenv_{date}_cubes_{n_cubos_max}'
     )
@@ -205,13 +205,13 @@ def test(n_cubos_max:int = 2, seed:int = None):
             break
 
 if __name__ == '__main__':
-    n_cubos_max = 10
+    n_cubos_max = 4
     training = True
-    re_train = True
+    re_train = False
     if training:   
         if re_train:
-            retrain('ppo_rosenv_2025_1_15_9_20_cubes_10.zip', n_cubos_max=n_cubos_max)
+            retrain('ppo_rosenv_2025_1_15_9_55_cubes_10_140000_steps.zip', n_cubos_max=n_cubos_max)
         else:
-            train(n_cubos_max=10)
+            train(n_cubos_max=n_cubos_max)
     else:
         test(n_cubos_max=n_cubos_max, seed=2)

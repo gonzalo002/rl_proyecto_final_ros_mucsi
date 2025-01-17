@@ -258,7 +258,7 @@ class ROSEnv(gym.Env):
         """
         for i, pseudo_rands in enumerate(cubos):
             cubo:IdCubos = IdCubos()
-            cubo.pose = Pose(position=Point(x=pseudo_rands[0], y=pseudo_rands[1], z=0.237), 
+            cubo.pose = Pose(position=Point(x=pseudo_rands[0], y=pseudo_rands[1], z=0.0125), 
                              orientation=Quaternion(*quaternion_from_euler(pi, 0, pseudo_rands[2], 'sxyz')))
             cubo.color = int(pseudo_rands[3]) # Color
             cubo.id = i
@@ -266,13 +266,11 @@ class ROSEnv(gym.Env):
             self.cubos.append(cubo)
             discretized_cube = self.discretize_position(cubo.pose, 
                                                         self.robot_workspace_values['min_y'], 
-                                                        0.237, 
+                                                        0.0125, 
                                                         self.robot_workspace_values['min_alpha'])
             self.discretized_cubes.append([i, *discretized_cube, cubo.color])
 
-            virtual_pose = deepcopy(cubo.pose)
-            virtual_pose.position.z = 0.0125
-            self.control_robot.add_box_obstacle(f"Cubo_{cubo.id}", virtual_pose, (0.025, 0.025, 0.025))
+            self.control_robot.add_box_obstacle(f"Cubo_{cubo.id}", cubo.pose, (0.025, 0.025, 0.025))
     
     def _replace_unknow_colors(self) -> None:
         """
@@ -332,44 +330,36 @@ class ROSEnv(gym.Env):
         # Ajuste en la posición X, Y y Z basados en la matriz de posición.
         pose.position.x += ((self.cube_size + self.cube_separation*2) * matrix_position[0])
         pose.position.y += ((self.cube_size + self.cube_separation*2) * matrix_position[1]) + 0.1
-        pose.position.z = ((self.cube_size) * matrix_position[2])+0.237
+        pose.position.z = ((self.cube_size) * matrix_position[2])+0.0125
 
-
-        virtual_pose = deepcopy(pose)
-        virtual_pose.position.z -= 0.2245
-        self.control_robot.add_box_obstacle(f"Cubo_{cube_id}", virtual_pose, (0.025, 0.025, 0.025))
+        self.control_robot.add_box_obstacle(f"Cubo_{cube_id}", pose, (0.025, 0.025, 0.025))
         self.cubos[cube_id].pose = pose
         discretized_cube = self.discretize_position(self.cubos[cube_id].pose, 
                                 self.robot_workspace_values['min_y'], 
-                                0.237, 
+                                0.0125, 
                                 self.robot_workspace_values['min_alpha'])
         self.discretized_cubes[cube_id][1:5] = discretized_cube
     
-    def normalize_reward(self, reward:float) -> float:
-        """
-        Normaliza la recompensa.
-            @param reward: float, recompensa.
-            @return: float, recompensa normalizada.
-        """
-        self.reward = (50 + reward) / 50
-
     def step(self, action: List[int]) -> Tuple[np.ndarray, float, bool, bool, dict]:
         """
         Realiza un paso en el entorno.
             @param action: List[int], acción a realizar.
             @return: Tuple[np.ndarray, float, bool, bool, dict], observación, recompensa, si el episodio ha terminado, si la acción ha sido truncada y la información adicional.
         """
-        reward = 0.0 # Reinicia la recompensa
+        self.reward = 0.0 # Reinicia la recompensa
 
         self.n_steps += 1 # Incrementa el número de pasos
 
         if action >= len(self.cubos): # Si la acción no es válida
-            reward = -50.0 - self.total_reward # Penaliza la acción con -50
+            self.reward = -50.0 - self.total_reward - self.cont_failed_actions # Penaliza la acción con -50
 
-            self.normalize_reward(reward)
+            if self.reward < -50:
+                self.reward = -50
 
+            self.cont_failed_actions += 1
 
-            self.failed = True
+            if self.cont_failed_actions > 20:
+                self.failed = True
             
 
             if self.verbose:
@@ -380,11 +370,10 @@ class ROSEnv(gym.Env):
         self.cont_failed_actions = 0
 
         if action in self.taken_actions: # Si la acción ya ha sido tomada
-            reward = -25.0 # Penaliza la acción con -5
+            self.reward = -25.0 - self.cont_repeated_action# Penaliza la acción con -5
 
-            self.failed = True
-
-            self.normalize_reward(reward)
+            if self.reward < -50:
+                self.reward = -50
 
             self.cont_repeated_action += 1
 
@@ -403,7 +392,7 @@ class ROSEnv(gym.Env):
                 self.done = True
                 avg_time = self.total_time / len(self.taken_actions)
 
-                self.reward = 1.0
+                self.reward += self.total_reward + (4 - avg_time) * self.cubos_recogidos 
 
             cubo = -1
             
@@ -414,10 +403,9 @@ class ROSEnv(gym.Env):
 
 
         if selected_cube.color != figure_color: # Si el color del cubo no coincide con el color de la figura
-            reward = -20.0 - self.cont_failed_color# Penaliza la acción con -15s
-            if reward < -50:
-                reward = -50
-            self.normalize_reward(reward)
+            self.reward = -20.0 - self.cont_failed_color# Penaliza la acción con -15s
+            if self.reward < -50:
+                self.reward = -50
             
             self.cont_failed_color += 1
 
@@ -432,7 +420,7 @@ class ROSEnv(gym.Env):
         cube_pose.position.z = 0.237
 
         virtual_pose = deepcopy(cube_pose)
-        virtual_pose.position.z -= 0.2245
+        virtual_pose.position.z = 0.0125
 
         prev_pose:Pose = deepcopy(cube_pose) # Copia la pose del cubo seleccionado
         prev_pose.position.z = 0.3 # Ajusta la altura del cubo para recogerlo
@@ -450,8 +438,7 @@ class ROSEnv(gym.Env):
             self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', virtual_pose, [0.025]*3)
             self.failed_attempts += 1
 
-            reward = -10.0
-            self.normalize_reward(reward)
+            self.reward = -10.0
 
             if self.failed_attempts > 5:
                 self.failed = True
@@ -478,8 +465,7 @@ class ROSEnv(gym.Env):
             self.control_robot.add_box_obstacle(f'Cubo_{selected_cube.id}', virtual_pose, [0.025]*3)
             self.failed_attempts += 1
 
-            reward = -10.0
-            self.normalize_reward(reward)
+            self.reward = -10.0
 
             if self.failed_attempts > 5:
                 self.failed = True
@@ -495,18 +481,17 @@ class ROSEnv(gym.Env):
         tiempo_seg += tiempo.to_sec()
 
         if tiempo_seg > 5:  # Penaliza si el tiempo es excesivo
-            reward -= 0.1
+            self.reward -= 0.1
         else:  # Recompensa por tiempo dentro del rango esperado
-            reward += 0.1
+            self.reward += 0.1
 
         self.total_time += tiempo_seg  # Acumula el tiempo total
         
         tiempo_seg = tiempo_seg * 10 / 30 # Normaliza el tiempo (0, -10)
-        reward -= tiempo_seg
+        self.reward -= tiempo_seg
 
-        self.normalize_reward(reward)
 
-        self.total_reward += reward
+        self.total_reward += self.reward
 
         self.cubos_recogidos += 1
         self.taken_actions.add(action)
@@ -531,7 +516,9 @@ class ROSEnv(gym.Env):
             self.done=True
         
         if self.done: # Si el episodio ha terminado
-            self.reward = 1.0
+            avg_time = self.total_time / len(self.taken_actions)
+            self.reward += self.total_reward + (4 - avg_time) * self.cubos_recogidos  # La recompensa aumenta cuando el tiempo promedio es cercano a 4 segundos
+
 
         if self.verbose and self.done: # Si se desea mostrar información en pantalla
             print(f'\033[35m\nTrial {self.n_trials} - Step {self.n_steps} - \
