@@ -1,5 +1,94 @@
 Agente:
   Agent_Info:
+    Agent_name: src/proyecto_final/scripts/rl/agentes_entrenados/ppo_rosenv_2024_12_8_21_25_cubes_2
+    Log_name: PPO_2024_12_8_21_25_cubes_2
+    date: '2024_12_8_21_25'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 20
+    train_time: 2726.31546998024
+    mean_reward: !!python/object/apply:numpy.core.multiarray.scalar
+    - &id001 !!python/object/apply:numpy.dtype
+      args:
+      - f8
+      - false
+      - true
+      state: !!python/tuple
+      - 3
+      - <
+      - null
+      - null
+      - null
+      - -1
+      - -1
+      - 0
+    - !!binary |
+      4LchxmuuCcA=
+    std_reward: !!python/object/apply:numpy.core.multiarray.scalar
+    - *id001
+    - !!binary |
+      cRN8TWW0CEA=
+    cubos: 2
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: ./src/proyecto_final/scripts/rl/logs/2_cubos
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Reward por acciones iguales mal definido, aumentado el coste por igualdad
+Agente:
+  Agent_Info:
+    Agent_name: src/proyecto_final/scripts/rl/agentes_entrenados/ppo_rosenv_2024_12_8_23_38_cubes_2
+    Log_name: PPO_2024_12_8_23_38_cubes_2
+    date: '2024_12_8_23_38'
+  Train_Info:
+    model: stable_baselines3.ppo.ppo
+    total_timesteps: 20
+    train_time: 2737.728488445282
+    mean_reward: -1.038561
+    std_reward: 2.6204996110730105
+    cubos: 2
+  Agent_Parameters:
+    policy: MlpPolicy
+    learning_rate: 0.0003
+    n_steps: 2048
+    batch_size: 64
+    n_epochs: 10
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip_range: 0.2
+    clip_range_vf: null
+    normalize_advantage: true
+    ent_coef: 0.0
+    vf_coef: 0.5
+    max_grad_norm: 0.5
+    use_sde: false
+    sde_sample_freq: -1
+    target_kl: null
+    tensorboard_log: ./src/proyecto_final/scripts/rl/logs/2_cubos
+    policy_kwargs: null
+    verbose: 1
+    seed: null
+    device: auto
+  Comentario: Mantiene error con Acciones duplicadas, seeguir probando
+Agente:
+  Agent_Info:
     Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/ppo_rosenv_2025_1_13_0_28_cubes_10
     Log_name: PPO_2025_1_13_0_28_cubes_10
     date: '2025_1_13_0_28'
@@ -201,4 +290,16 @@ Agente:
     verbose: 1
     seed: null
     device: auto
+  Comentario: Introduce Comentario
+Agente:
+  Agent_Info:
+    Agent_name: /home/laboratorio/ros_workspace/src/proyecto_final/data/rl/agentes_entrenados/dqn_rosenv_2025_1_16_11_8_cubes_8
+    Log_name: DQN_2025_1_16_11_8_cubes_8
+    date: '2025_1_16_11_8'
+  Train_Info:
+    model: stable_baselines3.dqn.dqn
+    total_timesteps: 100000
+    train_time: 9720.213242053986
+    cubos: 8
+  Previous_Agent: dqn_rosenv_2025_1_16_8_28_cubes_10_40000_steps.zip
   Comentario: Introduce Comentario
